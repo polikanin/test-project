@@ -2,8 +2,8 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    rightItems: false,
-    leftItems: false,
+    rightItems: [],
+    leftItems: [],
   },
   mutations: {
     setRightItems (state, items) {
@@ -14,11 +14,11 @@ export default createStore({
     },
   },
   actions: {
-    setRightItems (context, items) {
-      context.commit('setRightItems', items)
+    setRightItems({ commit }, items) {
+      commit('setRightItems', items);
     },
-    setLeftItems (context, items) {
-      context.commit('setLeftItems', items)
+    setLeftItems({ commit }, items) {
+      commit('setLeftItems', items);
     },
   }
 })

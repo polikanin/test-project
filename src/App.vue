@@ -6,11 +6,11 @@
                     Left column (Top)
                 </h2>
                 <div class="row" v-if="selectedItems.length > 0">
-                    <div class="col-md-3" v-for="item in selectedItems">
+                    <div class="col-md-3" v-for="item in selectedItems" :key="item.id">
                         <v-card class="mb-2 mt-2"
-                                :data="item"
+                                :card-data="item"
                                 removable="true"
-                                @remove-item="removeItem(item)"
+                                @remove-item="() => removeItem(item)"
                         ></v-card>
                     </div>
                 </div>
@@ -24,9 +24,9 @@
                 </h2>
                 <v-card class="mb-2 mt-2"
                         v-if="selectedItem"
-                        :data="selectedItem"
+                        :card-data="selectedItem"
                         removable="true"
-                        @remove-item="removeItem"
+                        @remove-item="() => removeItem(selectedItem)"
                 ></v-card>
                 <h4 v-else>
                     Please select item!
@@ -40,9 +40,9 @@
                 </h2>
 
                 <div class="row">
-                    <div class="col-md-3" v-for="item in leftItems">
+                    <div class="col-md-3" v-for="item in leftItems" :key="item.id">
                         <v-card class="mb-2 mt-2"
-                                :data="item"
+                                :card-data="item"
                                 :class="{'bg-light': selectedItems.indexOf(item) !== -1 }"
                                 @click="selectItem(item, true)"
                         ></v-card>
@@ -55,10 +55,10 @@
                 </h2>
 
                 <div class="row">
-                    <div class="col-md-3" v-for="item in rightItems">
+                    <div class="col-md-3" v-for="item in rightItems" :key="item.id">
                         <v-card class="mb-2 mt-2"
-                                :class="{'bg-light': selectedItem === item}"
-                                :data="item"
+                                :class="{'bg-light': selectedItem.id === item.id}"
+                                :card-data="item"
                                 @click="selectItem(item)"
                         ></v-card>
                     </div>
@@ -100,37 +100,41 @@ export default {
             this.getItems('/data/left.json', 'setLeftItems')
         },
         async getItems(url, action) {
-            if (url && action) {
-                let response = await fetch(url);
+            if (!url || !action) {
+                console.warn('URL и/или действие не указаны.');
+                return;
+            }
 
-                if (response.ok) {
-                    let json = await response.json();
-                    store.dispatch(action, json)
-                } else {
-                    alert("Ошибка HTTP: " + response.status);
+            try {
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ошибка: ${response.status}`);
                 }
+
+                const data = await response.json();
+                store.dispatch(action, data);
+            } catch (error) {
+                console.error('Ошибка при загрузке данных:', error.message);
             }
         },
         selectItem(item, multiple) {
             if(multiple){
-                this.selectedItems.length<6?this.selectedItems.push(item):false
+                if (this.selectedItems.length < 6 && !this.selectedItems.some(i => i.id === item.id)) {
+                    this.selectedItems.push(item)
+                }
             }
             else{
                 this.selectedItem = item
             }
         },
         removeItem(item) {
-            if(item){
-                this.selectedItems.splice(this.selectedItems.indexOf(item), 1)
-            }
-            else{
+            if (this.selectedItems.includes(item)) {
+                this.selectedItems = this.selectedItems.filter(i => i.id !== item.id)
+            } else if (this.selectedItem === item) {
                 this.selectedItem = false
             }
         }
     }
 }
 </script>
-
-<style lang="scss">
-
-</style>

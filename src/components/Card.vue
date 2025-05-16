@@ -1,18 +1,27 @@
 <template>
     <div class="card">
         <div class="card-body d-flex justify-content-between">
-            <h5 class="card-title">{{ data.name }}</h5>
-            <a href="#" class="btn btn-sm btn-danger" v-if="removable" @click.prevent="removeItem">
+            <h5 class="card-title">{{ cardData?.name || 'No Name' }}</h5>
+            <button class="btn btn-sm btn-danger" v-if="removable" @click.prevent="removeItem">
                 x
-            </a>
+            </button>
         </div>
     </div>
 </template>
 
 <script>
 export default {
-    name: 'card',
-    props: ['data', 'removable'],
+    name: 'Сard',
+    props: {
+        cardData: {
+            type: Object,
+            required: true
+        },
+        removable: {
+            type: Boolean,
+            default: false
+        }
+    },
     methods: {
         removeItem(){
             this.$emit('remove-item')
